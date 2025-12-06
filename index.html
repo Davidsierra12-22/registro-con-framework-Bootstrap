@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro con Bootstrap</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        /* Mantenemos tu fondo animado personalizado */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background: linear-gradient(-45deg, #1a1a1a, #330033, #001f3f, #333333);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start; /* Evita centrado vertical forzado */
+            padding-top: 50px;
+        }
+
+        /* Efecto Glassmorphism sobre la tarjeta de Bootstrap */
+        .glass-card {
+            background: rgba(33, 37, 41, 0.7) !important; /* Bootstrap dark con transparencia */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Personalización del color Púrpura */
+        .text-purple { color: #d63384; text-shadow: 0 0 5px #d63384; }
+        
+        .btn-purple {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+        }
+        .btn-purple:hover { background-color: #c049d1; color: white; }
+
+        /* Ajuste fino para inputs en modo oscuro */
+        .form-control:focus {
+            background-color: #2b3035;
+            color: #fff;
+            border-color: #9c27b0;
+            box-shadow: 0 0 0 0.25rem rgba(156, 39, 176, 0.25);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                <div class="card glass-card text-light">
+                    <div class="card-body p-4">
+                        
+                        <h1 class="text-center mb-4 text-purple">
+                            Registro de Usuarios <i class="bi bi-person-badge"></i>
+                        </h1>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control bg-dark text-light border-secondary" id="nombre" placeholder="Nombre">
+                                    <label for="nombre" class="text-secondary">Nombre</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control bg-dark text-light border-secondary" id="apellido" placeholder="Apellido">
+                                    <label for="apellido" class="text-secondary">Apellido</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control bg-dark text-light border-secondary" id="telefono" placeholder="Teléfono">
+                                    <label for="telefono" class="text-secondary">Teléfono</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 d-grid">
+                                <button id="btnGuardar" class="btn btn-purple btn-lg h-100">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="border-secondary my-4">
+
+                        <h3 class="mb-3">Listado de Registros</h3>
+                        <div class="table-responsive rounded">
+                            <table class="table table-dark table-hover table-striped mb-0 align-middle">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="d-none">ID</th> 
+                                        <th>Nombre</th>
+                                        <th>Apellido</th>
+                                        <th>Teléfono</th>
+                                        <th class="text-end">Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="datos">
+                                    </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // LÓGICA JAVASCRIPT (Adaptada para generar elementos de Bootstrap)
+        
+        let inpNombre = document.getElementById("nombre");
+        let inpApellido = document.getElementById("apellido");
+        let inpTelefono = document.getElementById("telefono");
+        let btnGuardar = document.getElementById("btnGuardar");
+        let registro = [];
+        let idEditando = null; // Variable para saber si estamos editando
+
+        // Cargar al inicio
+        if (localStorage.getItem('registroApp')) {
+            registro = JSON.parse(localStorage.getItem('registroApp'));
+            pintar();
+        }
+
+        btnGuardar.addEventListener("click", () => {
+            if (!inpNombre.value.trim() || !inpApellido.value.trim() || !inpTelefono.value.trim()) {
+                // Usamos una alerta simple, pero con Bootstrap podrías usar un Toast o Modal
+                alert("⚠️ Por favor completa todos los campos");
+                return;
+            }
+
+            if (idEditando) {
+                // MODO EDICIÓN: Actualizamos el existente
+                const index = registro.findIndex(item => item.id === idEditando);
+                if (index !== -1) {
+                    registro[index].nombre = inpNombre.value.trim();
+                    registro[index].apellido = inpApellido.value.trim();
+                    registro[index].telefono = inpTelefono.value.trim();
+                }
+                idEditando = null;
+                btnGuardar.innerHTML = `<i class="bi bi-save"></i> Guardar`;
+                btnGuardar.classList.remove('btn-warning');
+                btnGuardar.classList.add('btn-purple');
+            } else {
+                // MODO CREACIÓN: Nuevo registro
+                let data = {
+                    id: Date.now(),
+                    nombre: inpNombre.value.trim(),
+                    apellido: inpApellido.value.trim(),
+                    telefono: inpTelefono.value.trim()
+                };
+                registro.push(data);
+            }
+
+            localStorage.setItem('registroApp', JSON.stringify(registro));
+            pintar();
+            limpiar();
+        });
+
+        function limpiar() {
+            inpNombre.value = "";
+            inpApellido.value = "";
+            inpTelefono.value = "";
+            inpNombre.focus();
+        }
+
+        function pintar() {
+            const tbody = document.getElementById("datos");
+            tbody.innerHTML = ""; // Limpiamos contenido previo
+
+            if (registro.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted p-3">No hay registros guardados</td></tr>`;
+                return;
+            }
+
+            registro.forEach((item) => {
+                let tr = document.createElement("tr");
+
+                // Creamos el contenido usando Template Strings para facilitar el uso de clases Bootstrap
+                tr.innerHTML = `
+                    <td class="d-none">${item.id}</td>
+                    <td>${item.nombre}</td>
+                    <td>${item.apellido}</td>
+                    <td><span class="badge bg-secondary font-monospace">${item.telefono}</span></td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-info btn-editar" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-eliminar" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                // Asignamos eventos a los botones recién creados
+                const btnEditar = tr.querySelector(".btn-editar");
+                const btnEliminar = tr.querySelector(".btn-eliminar");
+
+                btnEditar.addEventListener("click", () => cargarEdicion(item));
+                btnEliminar.addEventListener("click", () => eliminarRegistro(item.id));
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eliminarRegistro(id) {
+            if (confirm("¿Estás seguro de eliminar este registro?")) {
+                registro = registro.filter(item => item.id !== id);
+                localStorage.setItem('registroApp', JSON.stringify(registro));
+                
+                // Si borramos el que estábamos editando, limpiamos el form
+                if(idEditando === id) {
+                    limpiar();
+                    idEditando = null;
+                    btnGuardar.innerHTML = `<i class="bi bi-save"></i> Guardar`;
+                    btnGuardar.classList.remove('btn-warning');
+                    btnGuardar.classList.add('btn-purple');
+                }
+                pintar();
+            }
+        }
+
+        function cargarEdicion(item) {
+            inpNombre.value = item.nombre;
+            inpApellido.value = item.apellido;
+            inpTelefono.value = item.telefono;
+            
+            idEditando = item.id;
+            
+            // Cambiamos visualmente el botón Guardar para indicar que es una edición
+            btnGuardar.innerHTML = `<i class="bi bi-arrow-repeat"></i> Actualizar`;
+            btnGuardar.classList.remove('btn-purple');
+            btnGuardar.classList.add('btn-warning'); // Color amarillo para indicar atención
+        }
+    </script>
+</body>
+</html>
